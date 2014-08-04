@@ -20,42 +20,24 @@ while(<>) {
     }}
 say "#Genera are all stored in hash ...\n#Now querying graphDB";
 
-#my $stmt='start basetaxa=node:ncbitaxid(taxid={taxids}) match basetaxa-[:childof*]->(genus:`genus`) return genus.taxid';
+my $stmt = <<EOF;
+match (genus:genus) 
+where genus.name = {nameoftaxa}
+with  genus 
+match p=(genus)<-[:childof*0..]-(lowerr:species)<-[:childof*0..]-(lowest)
+return 
+    genus.taxid as originID, 
+    genus.name as originName, 
+    lowest.taxid as targetID, 
+    lowest.name as targetName,
+    head(labels(lowest)) as rank
+EOF
 
-#First match
-my $stmt='match (n:genus) where n.name ={nameoftaxa} return n.taxid';
+say (join "\t",qw/originID originName targetID targetName rank/);
 foreach my $taxaname (keys %topgenera) {
 	my $query = REST::Neo4p::Query->new($stmt,{ nameoftaxa => $taxaname});
 	$query->execute;
 	while (my $row = $query->fetch) {
-		$topgenera{$taxaname} = $row->[0];
-	}
-}
-say '#Assigned taxid to genera';
-
-#2nd match find all taxa at and below species associated with the genus of interest
-my $stmt2 = <<EOF;
-START basetaxa=node:ncbitaxid(taxid={taxids}) 
-MATCH basetaxa<-[:childof*0..]-(lower)<-[:childof*0..]-(lowest)
-WHERE lower:species 
-RETURN labels(lowest), lowest.taxid, lowest.name
-EOF
-
-say "taxid\trank\t\tparentgenera\tchildname";	#header
-
-foreach my $parenttaxid (keys %topgenera){
-	my $query = REST::Neo4p::Query->new($stmt2,{ taxids => $topgenera{$parenttaxid}});
-	$query->execute;
-	while (my $row = $query->fetch) {
-		my ($rank, $taxid, $name);
-#	   #extract the rank##################################################
-	    	foreach (@{$row->[0]}) {		#this column has multiple items hence its an array
-	    	    if (!/Taxon/){			#there's labels called "Taxon"
-	    	    	$rank = $_;
-	    	    }}
-#	   ###################################################################
-		$taxid = $row->[1];
-		$name  = $row->[2];
-		say "$taxid\t$rank\t$topgenera{$parenttaxid}\t$name";
+	    say (join ("\t", $row->[0], $row->[1], $row->[2], $row->[3], $row->[4]));
 	}
 }

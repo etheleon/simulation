@@ -1,9 +1,11 @@
 #Functions of each script
 
-##sim.0100
+##sim.0100 
+ (simple)
  From the relative abundance data choose the top100 genera [output: namelist]
 
-##sim.0101
+##sim.0101 
+(submission requires NEO$J)
 Takes name list and returns all taxa related to the top100 list
 ```
   originID     originName targetID                     targetName    rank
@@ -30,6 +32,7 @@ Takes name list and returns all taxa related to the top100 list
 ##sim.0109 
   Takes in the list of GIs with sequences and chooses one genome for each genera
 
+
 ##sim.0120
   Takes the list of selected GIs and extracts the sequences
 
@@ -44,7 +47,7 @@ Takes name list and returns all taxa related to the top100 list
    ```
    cd /export2/ulu_pandan2011/
    for i in `ls`; do cat $i | echo $i\t$((`wc -l`/4)); done;
-   ```
+
 s_1_1.filtered.fastqt172976284
 s_1_2.filtered.fastqt172976284
 s_2_1.filtered.fastqt164554783
@@ -61,3 +64,4 @@ s_7_1.filtered.fastqt170304759
 s_7_2.filtered.fastqt170304759
 s_8_1.filtered.fastqt182780732
 s_8_2.filtered.fastqt182780732
+```

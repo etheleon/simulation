@@ -1,4 +1,5 @@
-#qsub -V -cwd -b y script/sim.0104.builddb.pl /export2/home/uesu/db/refseq/bac_arch/archaea.2.1.genomic.fna
+qsub -V -cwd -b y script/sim.0104.builddb.pl /export2/home/uesu/db/refseq/bac_arch/archaea.1.1.genomic.fna
+qsub -V -cwd -b y script/sim.0104.builddb.pl /export2/home/uesu/db/refseq/bac_arch/archaea.2.1.genomic.fna
 qsub -V -cwd -b y script/sim.0104.builddb.pl /export2/home/uesu/db/refseq/bac_arch/archaea.3.1.genomic.fna
 qsub -V -cwd -b y script/sim.0104.builddb.pl /export2/home/uesu/db/refseq/bac_arch/bacteria.100.1.genomic.fna
 qsub -V -cwd -b y script/sim.0104.builddb.pl /export2/home/uesu/db/refseq/bac_arch/bacteria.101.1.genomic.fna

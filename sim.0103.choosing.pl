@@ -6,18 +6,22 @@ use lib "/export2/home/uesu/perl5/lib/perl5";
 use autodie;
 use Storable;
 
+die "$0 <output.sim.0101.output> \n" unless $#ARGV == 0;
+
+
 #Stores the GI to be removed ie. belonging to the top100 genera
 my %taxahash;
-open TOBEDELETED, "/export2/home/uesu/simulation_fr_the_beginning/out/sim.0101.out.txt";
+#open TOBEDELETED, "/export2/home/uesu/simulation_fr_the_beginning/out/sim.0101.out.txt";
+open TOBEDELETED, $ARGV[0];
 while(<TOBEDELETED>){
-unless(/^#/ || /^taxid/){
+unless(/^#/ || /^originID/){
     chomp;
-my ($taxa, $parent) =  (split(/\t/))[0,3];
-$taxahash{$taxa}++ unless $parent =~ /33057/;	#Keep Thauera
+    my ($parent, $taxa) =  (split(/\t/))[0,2];
+    $taxahash{$taxa}=$parent unless $parent =~ /33057/;	#Keep Thauera
 }
 }
 close TOBEDELETED;
-say "#Finished storing condemned taxa. Total",scalar keys %taxahash;
+say "#Finished storing condemned taxa. Total ", scalar keys %taxahash;
 
 #assigns the gi belonging to condemned taxa to hash (key::taxid)
 my %gihash;
@@ -26,10 +30,8 @@ while(<GITAX>){
     chomp;
     my($gi, $taxid) = split(/\t/);
 #    say "$gi\t$taxid";
-    $gihash{$gi}++ if (exists $taxahash{$taxid});
+    $gihash{$gi} = $taxahash{$taxid} if (exists $taxahash{$taxid});	#links GI with parentGenus
 }
 close GITAX;
 say "#Finished stored condemned gi. Total",scalar keys %gihash;
-
 store \%gihash, "out/sim.0103.out.pdo";
-

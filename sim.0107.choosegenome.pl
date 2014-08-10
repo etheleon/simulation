@@ -18,10 +18,6 @@ while(<GITAX>){
 close GITAX;
 
 #Stores refseq GIs of the top100 taxa into %gihash2 (hash of arrays)
-
-#410600 fasta entries
-my %gihash2;
-
 open IN, "zcat out/sim.0106.input.gz | ";
 open OUT, ">out/sim.0107.out.txt";
 
@@ -32,26 +28,3 @@ while(<IN>){
 	say OUT "$gi\t$gihash{$gi}";
     }
 }
-
-#lucky draw
-#my %gihash3;
-#foreach (keys %gihash2) { 
-#    my @array = @{$gihash2{$_}};
-#    my $chosengi = $array[int(rand @array)];
-#	$gihash3{$chosengi}++
-#}
-#say 'Theres ', scalar keys %gihash3, "chosen";
-
-#my $in  = Bio::SeqIO->new(-file => "zcat out/sim.0106.input.gz |", -format => 'Fasta');
-#my $out= IO::Zlib->new("out/sim.0107.out.gz", "wb9");
-#
-#while (my $seq = $in->next_seq ){
-#    my $seqid 		= $seq->display_id;
-#    my ($gi) =(split(/\|/, $seqid))[1];
-##	key:giid	   value:refseq
-#    if(exists $gihash3{$gi}){
-#	say $out ">",$seqid,"|",$gihash{$gi};
-#	say $out $seq->seq;
-#    }
-#}
-#$out->close;

@@ -12,7 +12,7 @@ open IN, "out/sim.0109.out.txt";
 while(<IN>) {
     unless ($. == 1) { 
 	chomp;
-	my $gi = (split(/\s+/))[0];
+	my $gi = (split(/\s+/))[5];
 	$gihash{$gi}++;
     }
 }

@@ -22,6 +22,7 @@ my $in  = Bio::SeqIO->new(-file => "zcat $ARGV[0].gz |", -format => 'Fasta');
 
 my $outputfilename = "$ARGV[0]"."_trimmed.gz";
 my $outputfilename2 = "$ARGV[0]"."_removed.gz";
+
 my $out= IO::Zlib->new("$outputfilename", "wb9");
 my $out2= IO::Zlib->new("$outputfilename2", "wb9");
 #
@@ -36,7 +37,8 @@ while (my $seq = $in->next_seq ){
 	say $out $seq->seq;
     }else{
 	say "foundone";
- 	say $out2 ">",$seqid;
+ 	say $out2 ">",$seqid,"::",$gihash{$gi};
+ 	say "$gi\t$gihash{$gi}";
 	say $out2 $seq->seq;
     }
 }

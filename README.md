@@ -1,8 +1,6 @@
-Part1: Init
-======
+#Part1: Init
 
-sim.0100 
-------
+##sim.0100 
 Generate a ranked GENUS-ABUNDANDANCE list 
 
 ***output: namelist***
@@ -26,23 +24,20 @@ Generate a ranked GENUS-ABUNDANDANCE list
 ```
 
 ##sim.0010
-------
  Choose 100 genomes based on refseq genome availablility
  Gives the following outputs:
 	1. the genomes to be selected  
 	2. the list of genera to remove from the refseq database
 
-Part2:	Remove related sequences from refseq
-======
+#Part2:	Remove related sequences from refseq
 
-sim.0020
+##sim.0020
  Remove redundancy in the NAME <-> TAXID
 
 
 
-sim.0101 [INPUT:out/sim.0020.out.txt]
+##sim.0101 [INPUT:out/sim.0020.out.txt]
 
-------
 Takes chosen taxa list [data/topChosenGenera] and returns all taxa falling under the genera 
 NOTE: searching by name returns taxa with same name but not under bacteria
 
@@ -57,45 +52,22 @@ NOTE: searching by name returns taxa with same name but not under bacteria
   6   104175 Oscillochloris   765420 Oscillochloris trichoides DG-6 no rank
 ```
 
-sim.0103-105
-------
+##sim.0103-105
    1. **0103** Takes the taxa gi list (from ncbi taxonomy), stores the targetID (TAXON ID) and stores the taxaID:gi hash table  [INPUT: sim.0101.out.txt]
    2. **0104** loops through refseq fasta files spits out 2 outputs [trimmed removed of GI] + [the removed sequences]
    3. **0105** batch job 104 across each individual gz file
 
-Part2: Extract the genomes 
-======
+#Part2: Extract the genomes 
 
-sim.0200
-------
+##sim.0200
 takes in refseq ID 
 scans through refseq to extract the genome
 
-sim.0201
-------
+##sim.0201
 Replicates the abundances in the fasta file
 
-sim.0300
-------
+##sim.0300
 pushes the genomes into xc's scripts
-
-##sim.0107 
-  May be redundant; could use 103's hashtable, using checking.pl
-  Outputs taxid for the refseq GIs belonging to the top100 
-
-##sim.0109 
-  Takes in the list of GIs with sequences and chooses one genome for each genera
-
-
-##sim.0120
-  Takes the list of selected GIs and extracts the sequences
-
-##sim.0120
-  I need to know how the refseq sequences are taxa
-
-##sim.0121
-   Cal the abundance of the genera and corresponding the number of sequences
-
 
 Counting the number of sequences 
 ```bash

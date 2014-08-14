@@ -9,22 +9,23 @@ die "usage: $0 <genera.names.file>\n" unless $#ARGV==0;
 
 use REST::Neo4p;
 use REST::Neo4p::Query;
-REST::Neo4p->connect("http://192.168.100.1:7474");
+REST::Neo4p->connect("http://192.168.100.1:7474"); #need to update the internal DB
 
 my %topgenera;
 
+open my $output, ">", "out/sim.0101.out.txt";
 while(<>) { 
     if($. !=1){ 
     chomp;
-    $topgenera{(split(/\t/))[0]}++;
+    $topgenera{(split(/\t/))[1]}++;
     }}
-say "#Genera are all stored in hash ...\n#Now querying graphDB";
+
+say $output "#Genera are all stored in hash ...\n#Now querying graphDB";
+#foreach (keys %topgenera) { say };
 
 my $stmt = <<EOF;
-match (genus:genus) 
-where genus.name = {nameoftaxa}
-with  genus 
-match p=(genus)<-[:childof*0..]-(lowerr:species)<-[:childof*0..]-(lowest)
+START genus = node:ncbitaxid(taxid={nameoftaxa})
+MATCH p=(genus)<-[:childof*0..]-(lowerr:species)<-[:childof*0..]-(lowest)
 return 
     genus.taxid as originID, 
     genus.name as originName, 
@@ -33,11 +34,11 @@ return
     head(labels(lowest)) as rank
 EOF
 
-say (join "\t",qw/originID originName targetID targetName rank/);
+say $output (join "\t",qw/originID originName targetID targetName rank/);
 foreach my $taxaname (keys %topgenera) {
 	my $query = REST::Neo4p::Query->new($stmt,{ nameoftaxa => $taxaname});
 	$query->execute;
-	while (my $row = $query->fetch) {
-	    say (join ("\t", $row->[0], $row->[1], $row->[2], $row->[3], $row->[4]));
+	while (my $row = $query->fetch){
+	    say $output (join ("\t", $row->[0], $row->[1], $row->[2], $row->[3], $row->[4]));
 	}
 }

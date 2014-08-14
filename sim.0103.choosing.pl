@@ -8,7 +8,6 @@ use Storable;
 
 die "$0 <output.sim.0101.output> \n" unless $#ARGV == 0;
 
-
 #Stores the GI to be removed ie. belonging to the top100 genera
 my %taxahash;
 #open TOBEDELETED, "/export2/home/uesu/simulation_fr_the_beginning/out/sim.0101.out.txt";

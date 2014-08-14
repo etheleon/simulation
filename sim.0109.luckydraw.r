@@ -6,13 +6,13 @@ library(RJSONIO)
 library(dplyr)
 library(ggplot2)
 
-#Reads in the output from the initial parent-child link and the gi-child file
-parentchild=read.table("out/sim.0101.out.txt", h=T, sep="\t", skip=2)
-removedgenomes=read.table("out/sim.0107.out.txt",h=T,sep="\t")
-combined = merge(parentchild, removedgenomes, by.x="targetID", by.y="taxid")
-
 load("~/abu_genes/data/Abundance_Function/g454.1000.genus.rda")
-top500=head(tail(genus.454 %.% group_by(taxon) %.% summarise(abundance=sum(g1.mean)) %.% arrange(desc(abundance)) , n=-1), n=500)
+top100=setNames(head(tail(genus.454 %.% group_by(taxon) %.% summarise(abundance=sum(g1.mean)) %.% arrange(desc(abundance)) , n=-1), n=100), c("name","abundance"))
+
+#Reads in the output from the initial parent-child link and the gi-child file
+parentchild=unique(fread(input="out/sim.0101.out.txt", h=T, sep="\t", skip=2))
+removedgenomes=setNames(fread("out/sim.0107.out.txt",h=T,sep="\t"), c("gi","targetID"))
+combined = merge(parentchild, removedgenomes, by="targetID",all.x=T, allow.cartesian=T)
 
 #
 summaryTaxa = combined %.%
@@ -28,15 +28,17 @@ summaryTaxa1=merge(summaryTaxa, summaryTaxa0, by="originID")
 
 source("/export2/home/uesu/github/altimit/metamaps/metamaps/R/dbquery.R")
 
-idk=rbindlist(lapply(unique(summaryTaxa1$originID), function(taxa){
+idk=setNames(rbindlist(lapply(unique(summaryTaxa1$originID), function(taxa){
 dbquery(
 query="START taxon=node:ncbitaxid(taxid={taxa}) RETURN taxon.taxid, taxon.name", 
 params= list(taxa=taxa), 
 cypherurl = "http://metamaps.scelse.nus.edu.sg:7474/db/data/cypher")
-}))
+})), c("originID","name"))
+idk2=data.table(name=as.character(idk$name), originID=as.integer(idk$originID))
 
-summaryTaxa2=merge(summaryTaxa1, idk, by.x="originID","X1")
-merge(summaryTaxa2, top500, by.x="X2",by.y=")
+summaryTaxa2=merge(summaryTaxa1, idk2, by="originID")
+
+summaryTaxa3=merge(summaryTaxa2, top500,by="name")
 
 p0=	ggplot(summaryTaxa2, aes(x=reorder(X2,sizePerChild,median), y=log10(sizePerChild)))+
 	geom_boxplot()+

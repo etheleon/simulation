@@ -12,3 +12,6 @@ arrange(desc(total))
 
 top100genera = cbind(genera[1:100,], data.frame(rank=1:100))
 write.table(top100genera, file="data/top100genera.gDNA",sep="\t",row.names=F,quote=F)
+
+top500genera = cbind(genera[1:500,], data.frame(rank=1:500))
+write.table(top500genera, file="data/top500genera.gDNA",sep="\t",row.names=F,quote=F)

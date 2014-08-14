@@ -1,6 +1,8 @@
-#!/usr/bin/perl -w 
+#!/export2/home/uesu/local/perl52/bin/perl
 
-use 5.012;
+use v5.20;
+use feature 'signatures';
+no warnings 'experimental';
 use autodie;
 use lib "/export2/home/uesu/perl5/lib/perl5";
 
@@ -78,7 +80,7 @@ while(my $h = <QUAL>)
 	chomp $qual;	
 
 	my @qual = map { ord($_) - 33} split('', $qual);	#converts the ASCII chars into numbers 
-	my $leng = @qual;
+	my $leng = @qual;					#the length of the fastQ read 
 	next unless $leng;
 
 	$id++;							#the nth FASTQ sequence
@@ -86,8 +88,8 @@ while(my $h = <QUAL>)
 	# find a starting point for a sequencing read; 
 	# it must fit into the chromosome, or the length between 
 	# the point and end of chromosome must be longer than the read 
-	my $size = $leng + int($leng*$indelrate);
-	my $genomelocation = int(rand($totalleng-$size+1));
+	my $size = $leng + int($leng*$indelrate);			#the size of the read
+	my $genomelocation = int(rand($totalleng-$size+1));		#location of the concatenated genomes
 	$genomelocation = int(rand($totalleng-$size+1)) while(! fitChromosome($genomelocation, $size));
 	my $source = fitChromosome($genomelocation, $size);
 	my @source = @$source;
@@ -138,29 +140,26 @@ while(my $h = <QUAL>)
 close OUT;
 say "all done. please check $ARGV[2] for results";
 
-#Functionas
-sub fitChromosome
+#Functions
+sub fitChromosome($loc, $size)
 {
-	my $loc = shift;
-	my $size = shift;
 	my @location;
 	my $leng;
-	foreach(0..$#chrom)
+	foreach(@chrom) 	#@chrom stores the number of sequences in the fasta file; loops through from loc 0 till end
 	{
-		my $locinthis = $loc-$leng;
-		my $thisleng = $leng{$chrom[$_]};
-		$leng += $thisleng;
-		next if($locinthis>$thisleng-$size);
-		@location = ($chrom[$_],$locinthis,$locinthis+$size-1);
+		my $locinthis = $loc-$leng;		#the randomlly chosen global loc - leng
+		my $thisleng = $leng{$_};	#the length of this chromosome
+		$leng += $thisleng;			#stores the 
+		next if($locinthis>$thisleng-$size);	#if it fails ie. falls outside of the xsome's length
+		@location = ($_,$locinthis,$locinthis+$size-1);	#the length of the chromosome, the start location, the end location
 		return \@location;
 	}
 	return;
 }
 
-sub phred
+sub phred($score)
 {
 	#QV = - 10 * log_10( P_e )
-	my $score = shift;
 	return 10**($score/(-10));
 }
 

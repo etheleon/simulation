@@ -8,19 +8,17 @@ use Bio::SeqIO;
 use lib "/export2/home/uesu/perl5/lib/perl5";
 
 die "usage: $0 chosenGenomes.fna template.fq output indel-rate abundanceInfo
-\t\t(indel-rate: proportion of indel over all errors; default=0.1)
-\t\teg. $0 out/sim.0200.out.fna\n /export2/ulu_pandan2011/data/batch1_gDNA_illumina/filtered_fastq/s_1_1.filtered.fastq out/sim.0300.output 0.01 \n" unless $#ARGV>=2;
+		(indel-rate: proportion of indel over all errors; default=0.1)
+		eg. $0 out/sim.0200.out.fna /export2/ulu_pandan2011/data/batch1_gDNA_illumina/filtered_fastq/s_1_1.filtered.fastq out/sim.0300.output 0.01 \n" unless $#ARGV>=2;
 
 ##################################################
 #Init
 ##################################################
+my %seq;	#KEY::taxaID  VALUE::concatenated sequence of chromosomes
 my %leng;
-my %seq;
 my %score;
-# pre-calculate error-probability based on phred score
-$score{$_}=phred($_) foreach(0..100);
-
-my %ntrate;
+map {$score{$_}=phred($_)} 0..100;
+# my %ntrate;
 
 my $chrom;
 my $indelrate=0.01;
@@ -41,18 +39,22 @@ say "Reading Genomes ...";
 ##################################################
 
 my $genome = Bio::SeqIO->new(-file => "$ARGV[0]", -format => 'Fasta');
-while (my $seq = $genome->next_seq ){
-
-
-}
+while (my $sequence = $genome->next_seq )
+	{
+    	my $taxid = (split(/|/, $sequence->display_id))[1];
+	$seq{$taxid}.=$sequence->seq;
+	$leng{$taxid}+=$sequence->length;
+	$totalleng += $sequence->length;
+	}
+$genome->close
 
 #open my $genome, '<', $ARGV[0];
 #while(<$genome>)
 #{
-	next if(m/^\s*$/); 	# skip emputy lines
-	if(m/>\s*?(\S+)/)	# read fasta 
-	{$chrom = $1}else{$seq{$chrom} .= $_}
-}
+#	next if(m/^\s*$/); 	# skip emputy lines
+#	if(m/>\s*?(\S+)/)	# read fasta 
+#	{$chrom = $1}else{$seq{$chrom} .= $_}
+#}
 
 
 ##################################################
@@ -62,9 +64,9 @@ say "analyzing genome...";
 
 foreach my $genome (keys %seq)	#foreach sequence
 {
-	$seq{$genome} =~ s/\s//g;			#remove space chars
-	$leng{$genome} = length $seq{$genome};		#store the length of the sequence
-	$totalleng += $leng{$genome};			#stores the total length of all the genomes into $totalength
+#	$seq{$genome} =~ s/\s//g;			#remove space chars
+#	$leng{$genome} = length $seq{$genome};		#store the length of the sequence
+#	$totalleng += $leng{$genome};			#stores the total length of all the genomes into $totalength
 	$ntrate{'a'} += ($seq{$genome}=~tr/aA/AA/);	#count the number of ATCGs
 	$ntrate{'t'} += ($seq{$genome}=~tr/tT/TT/);
 	$ntrate{'g'} += ($seq{$genome}=~tr/gG/GG/);
@@ -168,7 +170,7 @@ sub fitChromosome($loc, $size)
 	return;
 }
 
-#Calculates probability of mutation
+#Calculates error-probability of mutation
 sub phred($score)
 {
 	return 10**($score/(-10));

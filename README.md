@@ -1,40 +1,36 @@
-#Part1: Init
+#Part0: Init
 
 ##sim.0100 
 Generate a ranked GENUS-ABUNDANDANCE list 
 
 ***output: namelist***
 ```
-    taxon   total   rank
+    taxon   total   rank (abundance)
     Caldilinea      25414.868178775 1
     Nitrospira      20661.7492551171        2
     Sorangium       18241.7170368186        3
     Mycobacterium   14892.9966161738        4
     Candidatus Accumulibacter       11906.5856237162        5
-    Streptomyces    9883.98971459188        6
-    Anaerolinea     8975.14623219175        7
-    Burkholderia    8515.90087908299        8
-    Thauera 6212.32458541424        9
-    Plesiocystis    6043.42026585336        10
-    Haliangium      5863.121853042  11
-    Haliscomenobacter       5838.63289876914        12
-    Niastella       5308.86398920914        13
-    Verrucomicrobium        5222.86520717125        14
-    Candidatus Solibacter   4867.26792084037        15
 ```
 
 ##sim.0010
  Choose 100 genomes based on refseq genome availablility
  Gives the following outputs:
-	1. the genomes to be selected  
-	2. the list of genera to remove from the refseq database
+	1. the selected genera (name) to be removed [topChosenGenera.txt]
+```
+    Streptomyces    9883.98971459188        6
+    Anaerolinea     8975.14623219175        7
+    Burkholderia    8515.90087908299        8
+    Thauera 6212.32458541424        9
+    Plesiocystis    6043.42026585336        10
+```
+	2. the refseq IDs of the randomly chosen genomes [sim.0010.out.txt]
 
 #Part2:	Remove related sequences from refseq
 
 ##sim.0020
- Remove redundancy in the NAME <-> TAXID
-
-
+ Determine the exact taxid of the genera 
+ WHY? Redundancy in the NAME <-> TAXID 
 
 ##sim.0101 [INPUT:out/sim.0020.out.txt]
 
@@ -57,10 +53,13 @@ NOTE: searching by name returns taxa with same name but not under bacteria
    2. **0104** loops through refseq fasta files spits out 2 outputs [trimmed removed of GI] + [the removed sequences]
    3. **0105** batch job 104 across each individual gz file
 
+##sim.0106
+combines all the trimmed gz into 1
+
 #Part2: Extract the genomes 
 
-##sim.0200
-takes in refseq ID 
+##sim.0200 [input sim.0010.out.txt]
+	takes in refseq ID 
 scans through refseq to extract the genome
 
 ##sim.0201

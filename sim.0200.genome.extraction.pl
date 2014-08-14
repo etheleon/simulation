@@ -38,6 +38,8 @@ foreach (@files){
     	my $seqid = $seq->display_id;
     	my ($refid) =(split(/\|/, $seqid))[3];
 	    if(exists $ref{$refid}) { 
+	    	$seqid = 'genustaxaid|'.$ref{$refid}.'|'.$seqid;
+	    	$seq->display_id($seqid);
 	    	$out->write_seq($seq);
 		delete $ref{$refid};
     	    }

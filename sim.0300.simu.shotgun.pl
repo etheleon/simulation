@@ -89,54 +89,42 @@ for(my $n=0; $n<=$#zipped; $n+=2)
 	}
 
 ##################################################
-# reading quality scores
+# Simulate Shotgun sequence
 say "4. Reading quality scores & simulating shotgun ...";
 ##################################################
 
 open my $output, 	'>', 	$ARGV[2];				#OUTPUT
 open my $fastq, 	'<', 	$ARGV[1];
-while(my $header = <$fastq>){
-    	chomp $header;
+while(<$fastq>){
+	$id++;							#the nth sequence to be simulated
 	<$fastq>;<$fastq>;
-	$id++;							#the nth fastq sequence processed
 
-#quality
-	my $qual =  <$fastq>;
-	chomp $qual;
-	my @qual = map { ord($_) - 33 } split('',$qual);	#stores quality scores into array
-	my $qualitystring = join "\t", @qual;
+#Process Quality
+	my $qual =  <$fastq>;chomp $qual;
+	my @qual = map { ord($_) - 33 } split('',$qual);	#convert ASCII to indexNum
 	my $leng = @qual;					#the length of the fastq read 
+	my $qualitystring = join "\t", @qual;	
+	my $readsize =  $leng * 2;				#size of nt to be sucked in b4 mutation 
 
 #Choosing taxa and loc to pluck sequence out from
 	my $taxaofchoice = choosetaxa(@taxid);
-	say "\t Chose taxaID: $taxaofchoice";
-	my $readsize 		=  	$leng * 2;			#nt size be plucked from genome
 
-	#choose loc
-	say "Length of sequence:",length $seq{$taxaofchoice};
+#choose location
 	my $genomelocation 	= 	int(rand(length($seq{$taxaofchoice})-$readsize+1));
-
 	$genomelocation = int(rand($taxaofchoice-$readsize+1)) while(! fitChromosome($taxaofchoice,$genomelocation, $readsize));	#reassign if it doesnt fit
-	say "Location to sample: $genomelocation";
-
 	my $source = fitChromosome($taxaofchoice, $genomelocation, $readsize);
 	my @source = @$source;
 	
-	# read the sequence from the fitted genomic region
+#extract sequence
 	my $readnt = substr($seq{$source[0]}, $source[1],$readsize);	#problem
-	    say "\tthe string's length is: ",length $readnt;
 
-	# create a new shotgun sequencing read
-	my $newread;
-	my $index=0;
-	my $newsequence = join '', (map { mutate($readnt,$qualitystring,$_)} 0..$#qual);   	#generates new sequence
-	
+#create mutated shotgun sequencing read
+	my $newsequence = mutate($readnt, $qualitystring);   	
+
+#output	
 	say $output '>'."simu_${id}:$source[0]:$source[1]-",($source[1]+$leng),":$outputfile";
-#	eg >simu_taxid|111|GI|0010101|ref|NC_00001:0-10:outputfilename
 	say $output $newsequence;	#sequence
 }
-close $fastq;
-
 
 ####################################################################################################
 #Functions
@@ -173,25 +161,53 @@ sub ntfreq($taxid)
 }
 
 #mutates the sequence based on frequency
-sub mutate($readnt,$qual,$loc){
+sub mutate($readnt,$qual){
     	my @readnt = split(//, $readnt);
     	my @qual = split(/\t/, $qual);
-	my $qualityscore = $score{$qual[$loc]};	# error probability for this site
+    	my $loc = 1;	#this is loc of buffered seqeunce in case of deletion event
+    	my $i = scalar @qual;		#this is length of qual 
+    	
+    	my @outputsequence;	#store sequence
+	
+	for($i; $i > 0; $i--) { 
+	my $qualityscore = $score{$qual[$i]};	# error probability for this site
+	
 	if(rand()<$qualityscore){
-			if(rand()<$indelrate){						#INDEL EVENT
+	#MUTATION
+			#INDEL EVENT #####################################
+			if(rand()<$indelrate)	{
+			##################################################	
 				if(int(rand(2))){ 	#INSERTION
 					my $extra = rand_nt();
 					my $extra.= $readnt[$loc];
-					return $extra;
+					push @outputsequence, $extra;
+					$loc++
 				}else{			#DELETION	
-					return "";
+					$loc++;
+					push @outputsequence, $readnt[$loc];
+					$loc++
 				}
-			}else{ my $substitutedNT = rand_nt(); return $substitutedNT} 	#SUBSTITUTION EVENT
-	}else{return $readnt[$loc]}
+			##################################################	
+			
+			#SUBSTITUTION EVENT ##############################
+			}else	{ 						
+			##################################################	
+			    my $substitutedNT = rand_nt(); 
+			    push @outputsequence, $substitutedNT;
+					$loc++
+			    	} 	
+			##################################################	
+	}else{
+	#NO MUTATION
+	    push @outputsequence, $readnt[$loc];
+					$loc++;
+	    	}
+	}
+	my $finalseq = join '', @outputsequence;
+	return $finalseq;
 }
 
-
-#	#chooses the random ATGC to change
+#chooses the random ATGC to change
 sub rand_nt
 {
 	my $rand = rand;
@@ -202,6 +218,7 @@ sub rand_nt
 	return 'n';
 }
 
+#chooses a random taxa
 sub choosetaxa 
 {
     my $rand = rand();

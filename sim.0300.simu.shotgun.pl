@@ -6,8 +6,8 @@ use lib "/export2/home/uesu/perl5/lib/perl5";
 use autodie;
 use Bio::SeqIO;
 
-die "usage: $0 chosenGenomes.fna template.fq output indel-rate abundanceInfo
-		(indel-rate: proportion of indel over all errors; default=0.1)\n" unless $#ARGV>=2;
+die "usage: $0 chosenGenomes.fna template.fq output abundanceInfo indel-rate
+		(indel-rate: proportion of indel over all errors; default=0.1)\n" unless $#ARGV>=3;
 
 ##################################################
 # Part0: Init
@@ -33,7 +33,7 @@ my (@taxid,@zipped);
 #Scalar##
 my $totalAbu;						#summed abundance
 my $id = 0;						#For adding to fastq header
-my $indelrate=0.01;				 	#the INDEl error rate:percentage of errors to be indel
+my $indelrate=0.1;				 	#the INDEl error rate:percentage of errors to be indel
 my $outputfile = $ARGV[2]; $outputfile =~ s/.+\///; 	#the outputfile name
 ##########
 
@@ -56,7 +56,7 @@ while (my $sequence = $genome->next_seq ){
 say "3. Reading abundances.. ";
 ##################################################
 
-open my $abundance, '<', "out/sim.0201.out.txt"; #NOTEneed to convert to argv
+open my $abundance, '<', $ARGV[3]; #out/sim.0201.out.txt
 while(<$abundance>){unless ($. == 1){ 
 	my ($abu, $taxid) = (split(/\t/))[1,3];
 	$abundance{$taxid} = $abu
@@ -92,7 +92,7 @@ for(my $n=0; $n<=$#zipped; $n+=2)
 
 ##################################################
 # Simulate Shotgun sequence
-say "4. Reading quality scores & simulating shotgun ...";
+say "4. Reading quality scores & simulating ...";
 ##################################################
 
 open my $output, 	'>', 	$ARGV[2];				#OUTPUT

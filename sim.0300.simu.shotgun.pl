@@ -124,7 +124,7 @@ while(<$fastq>){
 	my $newsequence = mutate($readnt, $qualitystring);   	
 
 #output	
-	say $output '>'."simu_${id}|taxID$source[0]|loc|$source[1]-",($source[1]+$leng),"|output|$outputfile";
+	say $output '>'."simu_${id}|taxID|$source[0]|loc|$source[1]-",($source[1]+$leng),"|output|$outputfile";
 	say $output $newsequence;	#sequence
 }
 

@@ -25,11 +25,13 @@ my (%seq,%leng,%score,%ntrate,%abundance,%range,%globalnt);
 ##########
 
 #Arrays###
-my (@taxid,@zipped);						#stores taxid in decreasing abundances
+my (@taxid,@zipped);						
+#	@taxid	stores taxid in decreasing abundances
+#	@zipped	stores taxid, lower and upper abundances
 ##########
 
 #Scalar##
-my ($totalleng,$totalAbu);				#length of 
+my $totalAbu;						#summed abundance
 my $id = 0;						#For adding to fastq header
 my $indelrate=0.01;				 	#the INDEl error rate:percentage of errors to be indel
 my $outputfile = $ARGV[2]; $outputfile =~ s/.+\///; 	#the outputfile name

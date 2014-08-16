@@ -2,9 +2,9 @@
 
 use v5.20;
 use feature 'signatures';no warnings 'experimental';
+use lib "/export2/home/uesu/perl5/lib/perl5";
 use autodie;
 use Bio::SeqIO;
-use lib "/export2/home/uesu/perl5/lib/perl5";
 
 die "usage: $0 chosenGenomes.fna template.fq output indel-rate abundanceInfo
 		(indel-rate: proportion of indel over all errors; default=0.1)\n" unless $#ARGV>=2;
@@ -54,7 +54,7 @@ while (my $sequence = $genome->next_seq ){
 say "3. Reading abundances.. ";
 ##################################################
 
-open my $abundance, '<', "../out/sim.0201.out.txt";
+open my $abundance, '<', "out/sim.0201.out.txt"; #NOTEneed to convert to argv
 while(<$abundance>){unless ($. == 1){ 
 	my ($abu, $taxid) = (split(/\t/))[1,3];
 	$abundance{$taxid} = $abu
@@ -102,14 +102,14 @@ while(<$fastq>){
 #Process Quality
 	my $qual =  <$fastq>;chomp $qual;
 	my @qual = map { ord($_) - 33 } split('',$qual);	#convert ASCII to indexNum
-	my $leng = @qual;					#the length of the fastq read 
 	my $qualitystring = join "\t", @qual;	
-	my $readsize =  $leng * 2;				#size of nt to be sucked in b4 mutation 
 
 #Choosing taxa and loc to pluck sequence out from
 	my $taxaofchoice = choosetaxa(@taxid);
 
 #choose location
+	my $leng = @qual;					#the length of the fastq read 
+	my $readsize =  $leng * 2;				#size of nt to be sucked in b4 mutation 
 	my $genomelocation 	= 	int(rand(length($seq{$taxaofchoice})-$readsize+1));
 	$genomelocation = int(rand($taxaofchoice-$readsize+1)) while(! fitChromosome($taxaofchoice,$genomelocation, $readsize));	#reassign if it doesnt fit
 	my $source = fitChromosome($taxaofchoice, $genomelocation, $readsize);
@@ -118,11 +118,11 @@ while(<$fastq>){
 #extract sequence
 	my $readnt = substr($seq{$source[0]}, $source[1],$readsize);	#problem
 
-#create mutated shotgun sequencing read
+#mutate read
 	my $newsequence = mutate($readnt, $qualitystring);   	
 
 #output	
-	say $output '>'."simu_${id}:$source[0]:$source[1]-",($source[1]+$leng),":$outputfile";
+	say $output '>'."simu_${id}|taxID$source[0]|loc|$source[1]-",($source[1]+$leng),"|output|$outputfile";
 	say $output $newsequence;	#sequence
 }
 

@@ -96,11 +96,14 @@ open my $fastaOutput, 	'>', 	"$ARGV[2]".'.fna' || die $!;				#FASTA OUTPUT
 open my $fastqOutputONE, 	'>', 	"$ARGV[2]".'_1'.'.fq'  || die $!;				#FASTQ OUTPUT
 open my $fastqOutputTWO, 	'>', 	"$ARGV[2]".'_2'.'.fq'  || die $!;				#FASTQ OUTPUT
 
-say "reading file: ".$ARGV[1]."_1.filtered.fastq";
-say "reading file: ".$ARGV[1]."_2.filtered.fastq";
+#say "reading file: ".$ARGV[1]."_1.filtered.fastq.gz";
+my $fastqfileone = $ARGV[1]."_1.filtered.fastq.gz";
 
-open my $fastqONE, 	'<', 	$ARGV[1]."_1.filtered.fastq" || die $!;
-open my $fastqTWO, 	'<', 	$ARGV[1]."_2.filtered.fastq" || die $!;
+#say "reading file: ".$ARGV[1]."_2.filtered.fastq.gz";
+my $fastqfiletwo = $ARGV[1]."_2.filtered.fastq.gz";
+
+open my $fastqONE, 	"gzcat $fastqfileone | " || die $!;
+open my $fastqTWO, 	"gzcat $fastqfiletwo | " || die $!;
 
 #assumming single line fastq
 while (!eof($fastqONE) and !eof($fastqTWO)) {
@@ -111,6 +114,7 @@ while (!eof($fastqONE) and !eof($fastqTWO)) {
 
 	my $qualONE 	=  <$fastqONE>;
 	chomp $qualONE;
+#	say $qualONE;
 
 	my $qualTWO =  <$fastqTWO>;
 	chomp $qualTWO;

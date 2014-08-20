@@ -96,14 +96,23 @@ open my $fastaOutput, 	'>', 	"$ARGV[2]".'.fna' || die $!;				#FASTA OUTPUT
 open my $fastqOutputONE, 	'>', 	"$ARGV[2]".'_1'.'.fq'  || die $!;				#FASTQ OUTPUT
 open my $fastqOutputTWO, 	'>', 	"$ARGV[2]".'_2'.'.fq'  || die $!;				#FASTQ OUTPUT
 
+##say "reading file: ".$ARGV[1]."_1.filtered.fastq.gz";
+#my $fastqfileone = $ARGV[1]."_1.filtered.fastq.gz";
+#
+##say "reading file: ".$ARGV[1]."_2.filtered.fastq.gz";
+#my $fastqfiletwo = $ARGV[1]."_2.filtered.fastq.gz";
+#
+#open my $fastqONE, 	"gzcat $fastqfileone | " || die $!;
+#open my $fastqTWO, 	"gzcat $fastqfiletwo | " || die $!;
+
 #say "reading file: ".$ARGV[1]."_1.filtered.fastq.gz";
-my $fastqfileone = $ARGV[1]."_1.filtered.fastq.gz";
+my $fastqfileone = $ARGV[1]."_1.filtered.fastq";
 
 #say "reading file: ".$ARGV[1]."_2.filtered.fastq.gz";
-my $fastqfiletwo = $ARGV[1]."_2.filtered.fastq.gz";
+my $fastqfiletwo = $ARGV[1]."_2.filtered.fastq";
 
-open my $fastqONE, 	"gzcat $fastqfileone | " || die $!;
-open my $fastqTWO, 	"gzcat $fastqfiletwo | " || die $!;
+open my $fastqONE, 	"$fastqfileone " || die $!;
+open my $fastqTWO, 	"$fastqfiletwo " || die $!;
 
 #assumming single line fastq
 while (!eof($fastqONE) and !eof($fastqTWO)) {
@@ -234,18 +243,23 @@ sub writeSequence
 {
 my (	$id, $sequence, $qual, $nameOfSequence, $start, $readLength, 
 	$outputfile, $type, $filehandle, $filehandle2, $pair) = @_;
+
 my $header = "simuREAD_$id|gi|$gitaxid{$nameOfSequence}|taxID|$nameOfSequence|loc|$start-";
 $header .= $start+$readLength."|output|$outputfile/$pair";
+
 if($type eq 'fastq') 
 	{ 
 	    if($pair == 1) { 
 		say $filehandle '@'.$header;
-	    }else{
-		say $filehandle2 '@'.$header;
-	    }
 		say $filehandle $sequence;	#sequence
 		say $filehandle "+";
 		say $filehandle $qual;
+	    }else{
+		say $filehandle2 '@'.$header;
+		say $filehandle2 $sequence;	#sequence
+		say $filehandle2 "+";
+		say $filehandle2 $qual;
+	    }
 	}else{
 	  say $filehandle '>'.$header;
 	  say $filehandle $sequence;	#sequence

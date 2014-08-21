@@ -2,6 +2,22 @@
 
 library(Metamaps2)
 library(dplyr)
+#cypherurl = "metamaps.scelse.nus.edu.sg:7474/db/data/cypher"
+cypherurl = "http://localhost:7474/db/data/cypher"
+
+#AIM: Just take 500 
+
+dbquery<-function(query, cypherurl, params){
+df_raw = fromJSON(
+getURL(
+	cypherurl, 
+    	customrequest='POST', 
+        httpheader=c('Content-Type'='application/json'),
+        postfields=toJSON(list(query=query, params=params))
+              )	
+)
+as.data.frame(do.call(rbind,lapply(df_raw$data, function(x) matrix(x, nrow=1)))) 
+}
 #Using prokaryotes
 #Description
 #prokaryotes.txt: 	Prokaryotic genome sequencing projects
@@ -19,9 +35,9 @@ RETURN head(labels(higher)), higher.taxid,basetaxa.taxid"
 
 #match genera
 taxondf=	setNames(do.call(rbind,lapply(unique(refseq.data$TaxID), function(x){
-	dbquery(
+dbquery(
 		query=query,
-	    	cypherurl="metamaps.scelse.nus.edu.sg:7474/db/data/cypher", 
+	    	cypherurl=cypherurl, 
 	    	params=list(taxid=x)	
 	    	)
 })), c("Rank", "taxid", "origin"))
@@ -31,18 +47,31 @@ taxondf.genus=taxondf %.% group_by(origin) %.% filter(Rank == 'genus')
 #the Taxid of the observable taxa in the sludge
 abu=read.table("data/top500genera.gDNA",sep="\t",h=T)
 
-query1=	"MATCH (genus:genus) 
-WHERE genus.name = {nameoftaxa}
-return genus.name, genus.taxid"
+#Might have more than 1 taxa with the same name, 
+query1="MATCH (genus:genus)
+WHERE genus.name = {taxaname} 
+WITH genus 
+MATCH 
+ path=genus-[:childof*]->(king:superkingdom)
+RETURN
+ genus.name as NAME, 
+ genus.taxid as TAXID,
+ last(extract(n in nodes(path)| n.name)) AS SUPERKINGDOM"
 
 abu2=setNames(do.call(rbind,lapply(as.character(abu$taxon),function(x){
     dbquery(
     	query=query1, 
-    	params=list(nameoftaxa = x), 
-    	cypherurl="metamaps.scelse.nus.edu.sg:7474/db/data/cypher"
+    	params=list(taxaname= x), 
+    	cypherurl=cypherurl
 	)
     }))
-, c("taxon","taxid"))
+, c("taxon","taxid","superkingdom"))
+
+abu2=subset(abu2, superkingdom %in% c("Bacteria", "Archaea"))
+#some of the top500 do not belong in the top500 genera
+#413
+
+abu2=abu2[,c(1,2)]
 
 abu=merge(abu,abu2, by="taxon")
 abu=abu[order(abu$rank),]
@@ -52,6 +81,7 @@ combined=merge(taxondf.genus, abu, by.x="taxid", by.y="taxid")
 combined=combined[order(combined$rank),]
 
 #Finds how 1:nth genera to consider 
+#dun need right
 u=100;i=1
 while(i<100){
     	i <- sum(1:u %in% combined$rank)
@@ -59,9 +89,10 @@ while(i<100){
 }
 
 #sum(1:u %in% subset(combined, rank <= u)$rank)	#100 unique genera
+#combined2=subset(combined,rank<=u)
 
-combined2=subset(combined,rank<=u)
-combined3=merge(combined2, refseq.data, by.x="origin", by.y="TaxID")
+#264 genera with complete genomes
+combined3=merge(combined, refseq.data, by.x="origin", by.y="TaxID")
 
 #Choosen genome::luckydraw
 set.seed(5)
@@ -70,12 +101,22 @@ genus=subset(combined3, taxid == x)
 genus[sample(1:nrow(genus),1),]
 }))
 
-#OUTPUT
 
-#1 for parsing the genomes
-write.table(chosen_genomes[,c("origin","taxid","taxon","Chromosomes.RefSeq")], file="out/sim.0010.out.txt", row.names=F, sep="\t", quote=F)
+
+#OUTPUT
+#for genera with complete genomes
+write.table(chosen_genomes[,c("origin","taxid","taxon","Chromosomes.RefSeq")], 
+file="out/sim.0101.out.txt", row.names=F, sep="\t", quote=F)
 
 #2 for removing the related sequence
 chosenones=unique(combined3[,c("taxon","total","rank")])
 chosenones=chosenones[order(chosenones$rank),]
 write.table(chosenones, file="data/topChosenGenera.txt", quote=F, row.names=F,sep="\t")
+
+#3 To process those without
+write.table(
+x=data.frame(taxid=do.call(c,abu2$taxid[!abu2$taxid %in% unique(combined$taxid)])), 
+sep="\t", 
+row.names=F, 
+quote=F,
+file="out/sim.0101.missing.txt")

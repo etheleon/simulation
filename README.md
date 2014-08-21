@@ -1,9 +1,10 @@
-#Part0: Init
+#Part1: Init
 
-##sim.0100 
-Generate a ranked GENUS-ABUNDANDANCE list 
+***sim.0100.genometaxid.r***
+---
 
-***output: namelist***
+Function: Generate a ranked GENUS-ABUNDANDANCE list 
+[OUTPUT]
 ```
     taxon   total   rank (abundance)
     Caldilinea      25414.868178775 1
@@ -13,8 +14,18 @@ Generate a ranked GENUS-ABUNDANDANCE list
     Candidatus Accumulibacter       11906.5856237162        5
 ```
 
-##sim.0010
- Choose 100 genomes based on refseq genome availablility
+***sim.0101.chooseGenomes.r***
+
+THINGS TO DO: 
+1. need to include up to 500 genera
+2. Those with complete genomes take complete genomes; for those without, 
+..1. identify all of the children 
+..2. comb through REFSEQ for GIs associated with the child taxids 
+..3. and summarise 
+....combined length of the sequences with each of the taxas  
+....Somehow need to figure out how to choose the genomes
+	
+ Choose for genera with complete genomes, based on refseq genome availablility (refer to dl-ed table)
  Gives the following outputs:
 	1. the selected genera (name) to be removed [topChosenGenera.txt]
 ```
@@ -26,18 +37,24 @@ Generate a ranked GENUS-ABUNDANDANCE list
 ```
 	2. the refseq IDs of the randomly chosen genomes [sim.0010.out.txt]
 
+NOTE (not enough that we include only genera with complete genomes)
+THINGS TO DO need script to find the missing ones and 
+
+
+***sim.0020*** 
+#Missing!
+ Determine the exact taxid of the genera 
+ Reason? Redundancy in the NAME <-> TAXID 
+
+
 #Part2:	Remove related sequences from refseq
 
-##sim.0020
- Determine the exact taxid of the genera 
- WHY? Redundancy in the NAME <-> TAXID 
-
-##sim.0101 [INPUT:out/sim.0020.out.txt]
-
+***sim.0200.get.the.species.underneath*** 
+[INPUT:out/sim.0020.out.txt]
 Takes chosen taxa list [data/topChosenGenera] and returns all taxa falling under the genera 
 NOTE: searching by name returns taxa with same name but not under bacteria
 
-***OUTPUT***
+[OUTPUT]
 ```
   originID     originName targetID                     targetName    rank
   1   104175 Oscillochloris   543045   uncultured Oscillochloris sp species
@@ -48,25 +65,24 @@ NOTE: searching by name returns taxa with same name but not under bacteria
   6   104175 Oscillochloris   765420 Oscillochloris trichoides DG-6 no rank
 ```
 
-##sim.0103-105
-   1. **0103** Takes the taxa gi list (from ncbi taxonomy), stores the targetID (TAXON ID) and stores the taxaID:gi hash table  [INPUT: sim.0101.out.txt]
-   2. **0104** loops through refseq fasta files spits out 2 outputs [trimmed removed of GI] + [the removed sequences]
-   3. **0105** batch job 104 across each individual gz file
+***sim.0201-203***
+   1. **0201.giTaxaHash.pl** Takes the taxa gi list (from ncbi taxonomy), stores the targetID (TAXON ID) and stores the taxaID:gi hash table  [INPUT: sim.0101.out.txt]
+   2. **0202.trimDB** loops through refseq fasta files spits out 2 outputs [trimmed removed of GI] + [the removed sequences]
+   3. **0203** batch job 202 across each individual gz file
 
-##sim.0106
+***sim.0204.combinedTrimmed.sh***
 combines all the trimmed gz into 1
 
-#Part2: Extract the genomes 
+#Part3: Extract the genomes 
 
-##sim.0200 [input sim.0010.out.txt]
+***sim.0300***
+[input sim.0010.out.txt]
 	takes in refseq ID 
 scans through refseq to extract the genome
 
-##sim.0201
-Replicates the abundances in the fasta file
-
-##sim.0300
-pushes the genomes into xc's scripts
+#Part4: read creation
+***sim.0300***
+Pushes the genomes into xc's scripts
 
 Counting the number of sequences 
 ```bash
@@ -75,18 +91,25 @@ Counting the number of sequences
 
 s_1_1.filtered.fastqt 172976284
 s_1_2.filtered.fastqt 172976284
+
 s_2_1.filtered.fastqt 164554783
 s_2_2.filtered.fastqt 164554783
+
 s_3_1.filtered.fastqt 163325133
 s_3_2.filtered.fastqt 163325133
+
 s_4_1.filtered.fastqt 166683965
 s_4_2.filtered.fastqt 166683965
+
 s_5_1.filtered.fastqt 166518064
 s_5_2.filtered.fastqt 166518064
+
 s_6_1.filtered.fastqt 164701017
 s_6_2.filtered.fastqt 164701017
+
 s_7_1.filtered.fastqt 170304759
 s_7_2.filtered.fastqt 170304759
+
 s_8_1.filtered.fastqt 182780732
 s_8_2.filtered.fastqt 182780732
 ```

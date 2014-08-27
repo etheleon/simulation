@@ -96,6 +96,7 @@ gi      taxid   parentGenus     refid
 
 
 ***sim.0103.summary.r***
+
 |Input | Output | Comments | 
 |------|--------|----------|
 |out/sim.0102.out | 		|	|
@@ -111,6 +112,7 @@ summarises the
 #Part2:	Remove related sequences from refseq
 
 ***sim.0200.get.the.species.underneath.pl*** 
+
 |Input | Output | Comments | 
 |------|--------|----------|
 |out/sim.0101.out2.txt||list of genera - taxid (with or without genomes)|

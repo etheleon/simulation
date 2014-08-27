@@ -4,7 +4,11 @@
 ---
 
 Function: Generate a ranked GENUS-ABUNDANDANCE list 
-[OUTPUT]
+
+|Input | Output |
+|------|--------|
+|abundance table| data/top500genera.gDNA|
+
 ```
     taxon   total   rank (abundance)
     Caldilinea      25414.868178775 1
@@ -16,14 +20,15 @@ Function: Generate a ranked GENUS-ABUNDANDANCE list
 
 ***sim.0101.chooseGenomes.r***
 
+
 THINGS TO DO: 
 1. need to include up to 500 genera
 2. Those with complete genomes take complete genomes; for those without, 
-..1. identify all of the children 
-..2. comb through REFSEQ for GIs associated with the child taxids 
-..3. and summarise 
-....combined length of the sequences with each of the taxas  
-....Somehow need to figure out how to choose the genomes
+  1. identify all of the children 
+  2. comb through REFSEQ for GIs associated with the child taxids 
+  3. and summarise 
+  combined length of the sequences with each of the taxas  
+  Somehow need to figure out how to choose the genomes
 	
  Choose for genera with complete genomes, based on refseq genome availablility (refer to dl-ed table)
  Gives the following outputs:
@@ -40,11 +45,32 @@ THINGS TO DO:
 NOTE (not enough that we include only genera with complete genomes)
 THINGS TO DO need script to find the missing ones and 
 
+***sim.0102.combThruGIs.pl***
+[input sim.0101.missing.txt]
+1. Takes in taxids of genera without complete genomes & finds all children taxa
+2. Builds hash of childrentaxa::gi
+3. Loops through refseq and takes the sequence refseqID 
 
-***sim.0020*** 
-#Missing!
- Determine the exact taxid of the genera 
- Reason? Redundancy in the NAME <-> TAXID 
+OUTPUT
+```
+         gi  taxid parentGenus             refid
+         1 254971245 263906      499551       NR_028163.1
+         2 631251601 547055      499551       NR_112799.1
+         3  67926185 165597      263510 NZ_AADV02000295.1
+         4  67926203 165597      263510 NZ_AADV02000300.1
+         5  67926213 165597      263510 NZ_AADV02000303.1
+         6  67926222 165597      263510 NZ_AADV02000306.1
+```
+gives output for the total number of sequences per taxa
+
+
+***sim.0103.summary.r***
+summarises the 
+	# of sequences / parent genera
+	# of sequences / taxa
+	
+
+
 
 
 #Part2:	Remove related sequences from refseq

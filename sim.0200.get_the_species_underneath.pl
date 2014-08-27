@@ -4,7 +4,7 @@ use strict;
 use v5.10;
 use autodie;
 use lib "/export2/home/uesu/perl5/lib/perl5";
-die "usage: $0 <genera.names.file>\n" unless $#ARGV==0;
+die "usage: $0 <genera.names.file>\n" unless $#ARGV==0;	#eg. sim.0101.out2.txt
 #Aim of this is to parse
 
 use REST::Neo4p;
@@ -13,13 +13,13 @@ REST::Neo4p->connect("http://192.168.100.1:7474"); #need to update the internal 
 
 my %topgenera;
 
-open my $output, ">", "out/sim.0101.out.txt";
 while(<>) { 
     if($. !=1){ 
     chomp;
     $topgenera{(split(/\t/))[1]}++;
     }}
 
+open my $output, ">", "out/sim.0200.out.txt";
 say $output "#Genera are all stored in hash ...\n#Now querying graphDB";
 #foreach (keys %topgenera) { say };
 

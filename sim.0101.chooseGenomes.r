@@ -1,12 +1,11 @@
 #!/usr/bin/env Rscript
 
-library(Metamaps2)
+library(RCurl)
+library(RJSONIO)
 library(dplyr)
-#cypherurl = "metamaps.scelse.nus.edu.sg:7474/db/data/cypher"
-cypherurl = "http://localhost:7474/db/data/cypher"
+cypherurl = "192.168.100.1:7474/db/data/cypher"
 
 #AIM: Just take 500 
-
 dbquery<-function(query, cypherurl, params){
 df_raw = fromJSON(
 getURL(
@@ -18,6 +17,7 @@ getURL(
 )
 as.data.frame(do.call(rbind,lapply(df_raw$data, function(x) matrix(x, nrow=1)))) 
 }
+
 #Using prokaryotes
 #Description
 #prokaryotes.txt: 	Prokaryotic genome sequencing projects
@@ -25,7 +25,7 @@ as.data.frame(do.call(rbind,lapply(df_raw$data, function(x) matrix(x, nrow=1))))
 data=read.table("data/genomereports/prokaryotes.txt", sep="\t",fill=T,comment.char="",h=T)
 
 #Choose only genera with refseq sequences
-refseq.data = subset(data, Chromosomes.RefSeq != "-")
+refseq.data = filter(data, Chromosomes.RefSeq != "-", Status == 'Gapless Chromosome')
 
 #get the genus of these sequences
 query="START basetaxa=node:ncbitaxid(taxid={taxid})
@@ -66,12 +66,20 @@ abu2=setNames(do.call(rbind,lapply(as.character(abu$taxon),function(x){
 	)
     }))
 , c("taxon","taxid","superkingdom"))
-
 abu2=subset(abu2, superkingdom %in% c("Bacteria", "Archaea"))
-#some of the top500 do not belong in the top500 genera
+#genera from bacteria/Archaea in top500 genera 
 #413
 
 abu2=abu2[,c(1,2)]
+
+#for writing to output as input to sim.0200
+abuu=setNames(as.data.frame(do.call(cbind,
+lapply(1:ncol(abu2), function(x) {
+unlist(abu2[,x])
+    }
+    ))), colnames(abu2)
+)
+write.table(abuu, file="out/sim.0101.out2.txt",quote=F, row.names=F,sep="\t")
 
 abu=merge(abu,abu2, by="taxon")
 abu=abu[order(abu$rank),]
@@ -82,11 +90,11 @@ combined=combined[order(combined$rank),]
 
 #Finds how 1:nth genera to consider 
 #dun need right
-u=100;i=1
-while(i<100){
-    	i <- sum(1:u %in% combined$rank)
-	u <- u + 1
-}
+#u=100;i=1
+#while(i<100){
+#    	i <- sum(1:u %in% combined$rank)
+#	u <- u + 1
+#}
 
 #sum(1:u %in% subset(combined, rank <= u)$rank)	#100 unique genera
 #combined2=subset(combined,rank<=u)
@@ -101,8 +109,6 @@ genus=subset(combined3, taxid == x)
 genus[sample(1:nrow(genus),1),]
 }))
 
-
-
 #OUTPUT
 #for genera with complete genomes
 write.table(chosen_genomes[,c("origin","taxid","taxon","Chromosomes.RefSeq")], 
@@ -115,7 +121,9 @@ write.table(chosenones, file="data/topChosenGenera.txt", quote=F, row.names=F,se
 
 #3 To process those without
 write.table(
-x=data.frame(taxid=do.call(c,abu2$taxid[!abu2$taxid %in% unique(combined$taxid)])), 
+x=data.frame(
+taxid=
+do.call(c,abu2$taxid[!abu2$taxid %in% unique(combined$taxid)])), 
 sep="\t", 
 row.names=F, 
 quote=F,

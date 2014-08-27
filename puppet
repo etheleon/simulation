@@ -1,0 +1,8 @@
+qsub -N job1 -V -cwd -b y script/sim.0100.get.the.genera.of.interest.r
+qsub -N job2 -V -cwd -b y -hold_jid job1 script/sim.0101.chooseGenomes.r
+qsub -N job3 -V -cwd -b y -hold_jid job1,job2 script/sim.0102.combThruGIs.pl out/sim.0101.missing.txt
+qsub -N job4 -V -cwd -b y -hold_jid job1,job2,job3 script/sim.0103.summary.r
+qsub -N job5 -V -cwd -b y -hold_jid job1,job2 script/sim.0200.get_the_species_underneath.pl out/sim.0101.out2.txt
+qsub -N job6 -V -cwd -b y -hold_jid job1,job2,job5 sim.0201.giTaxaHash.pl out/sim.0200.out.txt
+
+

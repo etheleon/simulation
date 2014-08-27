@@ -6,7 +6,7 @@ use lib "/export2/home/uesu/perl5/lib/perl5";
 use autodie;
 use Storable;
 
-die "$0 <output.sim.0101.output> \n" unless $#ARGV == 0;
+die "$0 <out/sim.0200.out.txt> \n" unless $#ARGV == 0;
 
 #Stores the GI to be removed ie. belonging to the top100 genera
 my %taxahash;
@@ -33,4 +33,4 @@ while(<GITAX>){
 }
 close GITAX;
 say "#Finished stored condemned gi. Total",scalar keys %gihash;
-store \%gihash, "out/sim.0103.out.pdo";
+store \%gihash, "out/sim.0201.out.pdo";

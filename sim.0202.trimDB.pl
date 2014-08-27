@@ -10,7 +10,7 @@ use Storable;
 
 die "USAGE: $0 <refseq> leave the file extension out\n" unless $#ARGV == 0;
 
-my %gihash = %{retrieve("out/sim.0103.out.pdo")};
+my %gihash = %{retrieve("out/sim.0201.out.pdo")};
 
 ##################################################
 #Summary theres a total of 1260572 sequences

@@ -96,14 +96,14 @@ gi      taxid   parentGenus     refid
 
 
 ***sim.0103.summary.r***
+Some text:
 
 |Input | Output | Comments | 
 |------|--------|----------|
-|out/sim.0102.out | 		|	|
-|out/sim.0102.out2|		|	|
-||out/sim.0103.chosen.txt|refseqIDs of chosen taxa-genus|
-||out/sim.0103.summary1.pdf|	|	|
-|	|	|	|	
+|out/sim.0102.out | 		|				|
+|out/sim.0102.out2|		|				|
+||out/sim.0103.chosen.txt	|refseqIDs of chosen taxa-genus	|
+||out/sim.0103.summary1.pdf	|				|
 
 summarises the 
 	# of sequences / parent genera
@@ -112,6 +112,8 @@ summarises the
 #Part2:	Remove related sequences from refseq
 
 ***sim.0200.get.the.species.underneath.pl*** 
+
+sometext 
 
 |Input | Output | Comments | 
 |------|--------|----------|

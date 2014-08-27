@@ -19,68 +19,107 @@ Function: Generate a ranked GENUS-ABUNDANDANCE list
 ```
 
 ***sim.0101.chooseGenomes.r***
+---
 
+|Input | Output | Comments | 
+|------|--------|----------|
+|data/genomereports/prokaryotes.txt|| downloaded from ftp://ftp.ncbi.nih.gov/genomes/GENOME_REPORTS updated daily|
+|data/top500genera.gDNA|||
+||out/sim.0101.out.txt||
+||out/sim.0101.out2.txt|genera to be included (8 of which do not have any refseq sequences)|
+||data/topChosenGenera.txt||
+||out/sim.0101.missing.txt||
 
-THINGS TO DO: 
-1. need to include up to 500 genera
-2. Those with complete genomes take complete genomes; for those without, 
-  1. identify all of the children 
-  2. comb through REFSEQ for GIs associated with the child taxids 
-  3. and summarise 
-  combined length of the sequences with each of the taxas  
-  Somehow need to figure out how to choose the genomes
-	
- Choose for genera with complete genomes, based on refseq genome availablility (refer to dl-ed table)
- Gives the following outputs:
-	1. the selected genera (name) to be removed [topChosenGenera.txt]
+Filters:
+1. refseqID 
+2. gapless chromosome
+
+sim.0101.out.txt::265 genomes from 265 genera 
 ```
+origin  taxid   taxon   Chromosomes.RefSeq
+1284663 1578    Lactobacillus   NC_020229.1
+231023  286     Pseudomonas     NC_017986.1
+680198  1883    Streptomyces    NC_013929.1
+1234365 209     Helicobacter    NC_018937.1
+1032845 780     Rickettsia      NC_015866.1
+488222  1301    Streptococcus   NC_012466.1
+1005048 202907  Collimonas      NC_015856.1
+```
+data/topChosenGenera.txt::name/total.G.Abundance/rank
+```
+    taxon           total             	 rank
     Streptomyces    9883.98971459188        6
     Anaerolinea     8975.14623219175        7
     Burkholderia    8515.90087908299        8
     Thauera 6212.32458541424        9
     Plesiocystis    6043.42026585336        10
 ```
-	2. the refseq IDs of the randomly chosen genomes [sim.0010.out.txt]
+out/sim.0101.missing.txt
+```
+taxid
+1234
+233189
+191767
+162027
+2349
+354354
+113
+```
 
-NOTE (not enough that we include only genera with complete genomes)
-THINGS TO DO need script to find the missing ones and 
+Summary
+1. 	Those with complete genomes take complete genomes; for those without (see next script)
+  * Choose for genera with complete genomes, based on refseq genome availablility (ftp://ftp.ncbi.nih.gov/genomes/GENOME_REPORTS/)
 
 ***sim.0102.combThruGIs.pl***
 [input sim.0101.missing.txt]
-1. Takes in taxids of genera without complete genomes & finds all children taxa
-2. Builds hash of childrentaxa::gi
-3. Loops through refseq and takes the sequence refseqID 
 
-OUTPUT
+|Input | Output | Comments | 
+|------|--------|----------|
+|out/sim.0101.missing.txt	|			|					|
+|				|out/sim.0102.out	| gi-child-genus-refseqID		|
+|				|out/sim.0102.out2	| genus - bplength 			|
+|				|out/sim.102.output.fna	| FASTA sequences of children taxa	|
+
+out/sim.0102.out
 ```
-         gi  taxid parentGenus             refid
-         1 254971245 263906      499551       NR_028163.1
-         2 631251601 547055      499551       NR_112799.1
-         3  67926185 165597      263510 NZ_AADV02000295.1
-         4  67926203 165597      263510 NZ_AADV02000300.1
-         5  67926213 165597      263510 NZ_AADV02000303.1
-         6  67926222 165597      263510 NZ_AADV02000306.1
+gi      taxid   parentGenus     refid
+254971245       263906  499551  NR_028163.1
+631251601       547055  499551  NR_112799.1
+67926185        165597  263510  NZ_AADV02000295.1
+67926203        165597  263510  NZ_AADV02000300.1
 ```
-gives output for the total number of sequences per taxa
+
+  1. Identify children of genera without complete genomes
+  2. Comb through REFSEQ for GIs associated with the child taxids 
+
+
 
 
 ***sim.0103.summary.r***
+|Input | Output | Comments | 
+|------|--------|----------|
+|out/sim.0102.out | 		|	|
+|out/sim.0102.out2|		|	|
+||out/sim.0103.chosen.txt|refseqIDs of chosen taxa-genus|
+||out/sim.0103.summary1.pdf|	|	|
+|	|	|	|	
+
 summarises the 
 	# of sequences / parent genera
 	# of sequences / taxa
 	
-
-
-
-
 #Part2:	Remove related sequences from refseq
 
-***sim.0200.get.the.species.underneath*** 
-[INPUT:out/sim.0020.out.txt]
-Takes chosen taxa list [data/topChosenGenera] and returns all taxa falling under the genera 
+***sim.0200.get.the.species.underneath.pl*** 
+|Input | Output | Comments | 
+|------|--------|----------|
+|out/sim.0101.out2.txt||list of genera - taxid (with or without genomes)|
+
+
+Takes chosen taxa list and returns all taxa falling under the genera (genera with or without complete genomes)
 NOTE: searching by name returns taxa with same name but not under bacteria
 
-[OUTPUT]
+out/sim.0200.out.txt
 ```
   originID     originName targetID                     targetName    rank
   1   104175 Oscillochloris   543045   uncultured Oscillochloris sp species
@@ -92,8 +131,8 @@ NOTE: searching by name returns taxa with same name but not under bacteria
 ```
 
 ***sim.0201-203***
-   1. **0201.giTaxaHash.pl** Takes the taxa gi list (from ncbi taxonomy), stores the targetID (TAXON ID) and stores the taxaID:gi hash table  [INPUT: sim.0101.out.txt]
-   2. **0202.trimDB** loops through refseq fasta files spits out 2 outputs [trimmed removed of GI] + [the removed sequences]
+   1. **0201.giTaxaHash.pl** Takes the taxa gi list (from ncbi taxonomy), stores the targetID (TAXON ID) and stores the taxaID:gi hash table  [INPUT: sim.0200.out.txt]
+   2. **0202.trimDB** loops through refseq fasta files spits out 2 outputs [trimmed removed of GI] + [the removed sequences] [input:sim
    3. **0203** batch job 202 across each individual gz file
 
 ***sim.0204.combinedTrimmed.sh***
@@ -104,10 +143,13 @@ combines all the trimmed gz into 1
 ***sim.0300***
 [input sim.0010.out.txt]
 	takes in refseq ID 
-scans through refseq to extract the genome
+scans through refseq to 
+1. extract the genome
+2. refseq seq of genera without genomes and concatenate into1
+
 
 #Part4: read creation
-***sim.0300***
+***sim.0400***
 Pushes the genomes into xc's scripts
 
 Counting the number of sequences 

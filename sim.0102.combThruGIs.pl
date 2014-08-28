@@ -76,17 +76,17 @@ while(<GITAX>){
 }
 close GITAX;
 
-say "#Finished stored gis of genera with missing Genomes.\nTotal",scalar keys %gihash;
+say "#Finished stored gis of genera with missing Genomes.\nTotal ",scalar keys %gihash;
 
 #loop through all of the refseq files and record the refseq ID
 open my $output, ">", 	"out/sim.0102.out";
 open my $output2, ">", 	"out/sim.0102.out2";
-my  $seqout= Bio::SeqIO->new( -format => 'Fasta', -file => '>out/sim.0102.output.fna');
 
+my  $seqout = Bio::SeqIO->new( -format => 'Fasta', -file => '>out/sim.0102.output.fna');
 say $output (join "\t", qw/gi taxid parentGenus refid/);	#HEADER
 map {$missingGenera{$_} = 0} keys %missingGenera;		#resets count to zero
 
-foreach my $fna (@refseq){
+foreach my $fna (@refseq){			#this step can be parallelised
 my $in  = Bio::SeqIO->new(-file => "zcat $fna |", -format => 'Fasta');
 		    while (my $seq = $in->next_seq ){
 			my $sequenceID=$seq->display_id;

@@ -32,5 +32,5 @@ while(<GITAX>){
     $gihash{$gi} = $taxahash{$taxid} if (exists $taxahash{$taxid});	#links GI with parentGenus
 }
 close GITAX;
-say "#Finished stored condemned gi. Total",scalar keys %gihash;
+say "#Finished stored condemned gi. Total ",scalar keys %gihash;
 store \%gihash, "out/sim.0201.out.pdo";

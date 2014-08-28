@@ -56,8 +56,10 @@ foreach (@files){
 	    	$seqid = 'genustaxaid|'.$ref{$refid}.'|'.$seqid;
 	    	$seq->display_id($seqid);
 	    	$out->write_seq($seq);
+	    	my $sequence = $seq->seq();
 		my $length = $seq->length;
 		say $outt join "\t", $refid, $ref{$refid}, $length; 
+		joinNsplit($ref{$refid}, $sequence);
 		delete $ref{$refid};
     	    }
     }
@@ -71,3 +73,16 @@ open my $report, '>', 'out/sim.0300.out.report';
 say $report "refseq\ttaxid";
 foreach (keys %ref) { say $report "$_\t$ref{$_}"}
 close $report;
+
+
+sub joinNsplit
+{
+my ($taxid, $sequence) = @_;
+my $location = join "", "out/sim.0300/",$taxid,".fna";
+open my $taxaoutput, '>>', $location;
+if (-e $location) { 
+say $taxaoutput $sequence;
+}else{
+say $taxaoutput ">taxid|$taxid";
+}
+}

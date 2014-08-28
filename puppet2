@@ -1,0 +1,4 @@
+mkdir out/sim.0400
+qsub -N job7 -V -cwd -b y script/sim.0204.combinedTrimmed.sh
+qsub -N job8 -V -cwd -b y -hold_jid job7 script/sim.0300.genome.extraction.pl out/sim.010.out.txt out/sim.0103.chosen.txt 
+qsub -N job9 -V -cwd -b y -hold_jid job7,job8 script/sim.0400.simu.shotgun.pl

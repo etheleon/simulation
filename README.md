@@ -93,8 +93,6 @@ gi      taxid   parentGenus     refid
   2. Comb through REFSEQ for GIs associated with the child taxids 
 
 
-
-
 ***sim.0103.summary.r***
 Some text:
 
@@ -136,24 +134,27 @@ out/sim.0200.out.txt
 
 ***sim.0201-203***
    1. **0201.giTaxaHash.pl** Takes the taxa gi list (from ncbi taxonomy), stores the targetID (TAXON ID) and stores the taxaID:gi hash table  [INPUT: sim.0200.out.txt]
-   2. **0202.trimDB** loops through refseq fasta files spits out 2 outputs [trimmed removed of GI] + [the removed sequences] [input:sim
+   2. **0202.trimDB** loops through refseq fasta files spits out 2 outputs [trimmed removed of GI] + [the removed sequences] [input:sim]
    3. **0203** batch job 202 across each individual gz file
 
-***sim.0204.combinedTrimmed.sh***
-combines all the trimmed gz into 1
-
 #Part3: Extract the genomes 
+```
+tail -n +2 out/sim.0101.out.txt
+tail -n +2 out/sim.0103.chosen.txt | perl -aln -F"\t" -E 'say $F[1]' | sort | uniq| wc -l
+251+162
+```
 
 ***sim.0300***
-[input sim.0010.out.txt]
-	takes in refseq ID 
-scans through refseq to 
+	takes in refseq ID of both complete + incomplete
+	scans through refseq to 
 1. extract the genome
 2. refseq seq of genera without genomes and concatenate into1
 
 
 #Part4: read creation
 ***sim.0400***
+needs out/sim.0101.out2.txt (abundance)
+
 Pushes the genomes into xc's scripts
 
 Counting the number of sequences 

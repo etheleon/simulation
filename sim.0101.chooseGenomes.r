@@ -79,7 +79,9 @@ unlist(abu2[,x])
     }
     ))), colnames(abu2)
 )
+abuu = merge(abu, abuu, by="taxon")
 write.table(abuu, file="out/sim.0101.out2.txt",quote=F, row.names=F,sep="\t")
+
 
 abu=merge(abu,abu2, by="taxon")
 abu=abu[order(abu$rank),]

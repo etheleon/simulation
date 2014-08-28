@@ -79,10 +79,14 @@ sub joinNsplit
 {
 my ($taxid, $sequence) = @_;
 my $location = join "", "out/sim.0300/",$taxid,".fna";
-open my $taxaoutput, '>>', $location;
 if (-e $location) { 
-say $taxaoutput $sequence;
+open my $taxaoutput, '>>', $location;
+print $taxaoutput $sequence;
+close $taxaoutput;
 }else{
+open my $taxaoutput, '>>', $location;
 say $taxaoutput ">taxid|$taxid";
+print $taxaoutput $sequence;
+close $taxaoutput;
 }
 }

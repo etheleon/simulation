@@ -26,7 +26,7 @@ Function: Generate a ranked GENUS-ABUNDANDANCE list
 |data/genomereports/prokaryotes.txt|| downloaded from ftp://ftp.ncbi.nih.gov/genomes/GENOME_REPORTS updated daily|
 |data/top500genera.gDNA|||
 ||out/sim.0101.out.txt||
-||out/sim.0101.out2.txt|genera to be included (8 of which do not have any refseq sequences)|
+||out/sim.0101.out2.txt|genera to be included |
 ||data/topChosenGenera.txt||
 ||out/sim.0101.missing.txt||
 
@@ -65,7 +65,19 @@ taxid
 354354
 113
 ```
-
+out/sim.0101.out2.txt
+```
+taxon   taxid   total   rank
+Acaryochloris   155977  667.462796960323        136
+Acetivibrio     35829   128.366632969334        443
+Acetobacter     434     138.627376737752        419
+Achromobacter   222     476.653969032044        172
+Acidimicrobium  53634   848.208252322834        104
+Acidiphilium    522     332.311686180039        228
+Acidithiobacillus       119977  702.787990529785        130
+Acidobacterium  33973   234.199493222875        286
+Acidothermus    28048   176.924095434624        349
+```
 Summary
 1. 	Those with complete genomes take complete genomes; for those without (see next script)
   * Choose for genera with complete genomes, based on refseq genome availablility (ftp://ftp.ncbi.nih.gov/genomes/GENOME_REPORTS/)
